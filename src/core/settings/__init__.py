@@ -10,16 +10,54 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
+from pathlib import Path  # Python 3.6+ only
+import dj_database_url
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    from .local import *
-except ImportError:
-    from .production import *
+# env_path = Path('.') / '.env'
+ENV_PATH = "{}/.env".format(os.path.dirname(os.path.dirname(BASE_DIR)))
+load_dotenv(dotenv_path=ENV_PATH)
 
+# try:
+#     from .local import *
+# except ImportError:
+#     from .production import *
+
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "<- NO SECRET KE=Y >")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get('DEBUG', 'true').lower() == "true"
+
+# DEFAULT_CONNECTION = dj_database_url.parse(
+#     os.environ.get(os.environ.get("DATABASE_URL_CONFIG")))
+DEFAULT_CONNECTION = dj_database_url.parse(
+    (os.environ.get("DATABASE_URL_CONFIG")))
+DEFAULT_CONNECTION.update({"CONN_MAX_AGE": 600})
+DATABASES = {"default": DEFAULT_CONNECTION}
+ALLOWED_HOSTS = ['*']
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
